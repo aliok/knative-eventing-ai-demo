@@ -37,4 +37,6 @@ def hello_world():
 
     print(image)
 
-    return "Got it", 200
+    return {
+        "msg": "Got it"
+    }, 200
