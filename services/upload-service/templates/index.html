@@ -54,6 +54,10 @@
 <script>
     // iife
     (function () {
+        // these are passed in from the server
+        const MAX_IMAGE_WIDTH = parseInt("{{ max_img_width }}", 10);
+        const MAX_IMAGE_HEIGHT = parseInt("{{ max_img_height }}", 10);
+
         function debugImage(imageData) {
             try {
                 let img = new Image();
@@ -68,10 +72,40 @@
             }
         }
 
-        // these are passed in from the server
-        const MAX_IMAGE_WIDTH = parseInt("{{ max_img_width }}", 10);
-        const MAX_IMAGE_HEIGHT = parseInt("{{ max_img_height }}", 10);
+        function getImageData(image) {
+            let canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
 
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0);
+
+            return canvas.toDataURL();
+        }
+
+        function createScaledDownImage(image) {
+            // create a hidden canvas to scale down the image
+            let hRatio = MAX_IMAGE_WIDTH / image.naturalWidth;
+            let vRatio = MAX_IMAGE_HEIGHT / image.naturalHeight;
+
+            let ratio = Math.min(hRatio, vRatio);
+            if (ratio >= 1.0) {
+                // no need to scale down
+                return getImageData(image);
+            }
+
+            let scaledDownWidth = image.naturalWidth * ratio;
+            let scaledDownHeight = image.naturalHeight * ratio;
+
+            let canvas = document.createElement('canvas');
+            canvas.width = scaledDownWidth;
+            canvas.height = scaledDownHeight;
+
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, scaledDownWidth, scaledDownHeight);
+
+            return canvas.toDataURL();
+        }
 
         $(document).ready(() => {
             const canvas = document.getElementById('canvas');
@@ -86,31 +120,6 @@
             let currentImage = null;
             let currentScaledDownImageData = null;
             let currentImageRatio = 1.0;
-
-            function createScaledDownImage() {
-                // create a hidden canvas to scale down the image
-                let hRatio = MAX_IMAGE_WIDTH / currentImage.naturalWidth;
-                let vRatio = MAX_IMAGE_HEIGHT / currentImage.naturalHeight;
-
-                let ratio = Math.min(hRatio, vRatio);
-                if (ratio >= 1.0) {
-                    // no need to scale down
-                    currentScaledDownImageData = currentImage;
-                    return;
-                }
-
-                let scaledDownWidth = currentImage.naturalWidth * ratio;
-                let scaledDownHeight = currentImage.naturalHeight * ratio;
-
-                let canvas = document.createElement('canvas');
-                canvas.width = scaledDownWidth;
-                canvas.height = scaledDownHeight;
-
-                let ctx = canvas.getContext('2d');
-                ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, scaledDownWidth, scaledDownHeight);
-
-                currentScaledDownImageData = canvas.toDataURL();
-            }
 
             function drawImage() {
                 // clear canvas
@@ -159,7 +168,7 @@
                         const img = new Image();
                         img.onload = function () {
                             currentImage = img;
-                            createScaledDownImage();
+                            currentScaledDownImageData = createScaledDownImage(currentImage);
                             debugImage(currentScaledDownImageData);
                             drawImage();
                             callUpload();
