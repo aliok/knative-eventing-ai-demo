@@ -4,9 +4,9 @@ import base64
 import io
 import os
 
-MAX_IMG_SIZE_IN_BYTES = 100 * 1024
-MAX_IMG_WIDTH = os.environ.get("IMG_MAX_WIDTH", 640)
-MAX_IMG_HEIGHT = os.environ.get("IMG_MAX_HEIGHT", 640)
+MAX_IMG_SIZE_IN_BYTES = os.environ.get("MAX_IMG_SIZE_IN_BYTES", 1000 * 1000)
+MAX_IMG_WIDTH = os.environ.get("MAX_IMG_WIDTH", 640)
+MAX_IMG_HEIGHT = os.environ.get("MAX_IMG_HEIGHT", 640)
 
 app = Flask(__name__)
 

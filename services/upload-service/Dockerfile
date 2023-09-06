@@ -9,8 +9,11 @@ RUN pip install -r requirements.txt
 COPY . /opt/app
 
 EXPOSE 5000
-ENV IMG_MAX_WIDTH=640
-ENV IMG_MAX_HEIGHT=640
+
+# 1MiB
+ENV MAX_IMG_SIZE_IN_BYTES=1000000
+ENV MAX_IMG_WIDTH=640
+ENV MAX_IMG_HEIGHT=640
 
 CMD ["flask", "--app", "main", "run", "--host", "0.0.0.0"]
 
