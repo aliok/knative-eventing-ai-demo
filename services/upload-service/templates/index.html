@@ -52,9 +52,24 @@
 </div>
 
 <script>
+    function debugImage(imageData) {
+        try {
+            let img = new Image();
+            img.onload = function () {
+                console.log("Image dimensions:", img.width, "x", img.height, "ratio:", img.width / img.height, "size:", (imageData.length / 1024).toFixed(2), "Kb");
+                const style = `font-size: 300px; background-image: url("${imageData}"); background-size: contain; background-repeat: no-repeat;`;
+                console.log("%c     ", style);
+            };
+            img.src = imageData;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     // these are passed in from the server
-    const MAX_IMAGE_WIDTH =  {{ max_img_width }} ;
-    const MAX_IMAGE_HEIGHT = {{ max_img_height }} ;
+    const MAX_IMAGE_WIDTH = parseInt("{{ max_img_width }}", 10);
+    const MAX_IMAGE_HEIGHT = parseInt("{{ max_img_height }}", 10);
+
 
     $(document).ready(() => {
         const canvas = document.getElementById('canvas');
@@ -67,7 +82,33 @@
         const ctx = canvas.getContext('2d');
 
         let currentImage = null;
+        let currentScaledDownImageData = null;
         let currentImageRatio = 1.0;
+
+        function createScaledDownImage() {
+            // create a hidden canvas to scale down the image
+            let hRatio = MAX_IMAGE_WIDTH / currentImage.naturalWidth;
+            let vRatio = MAX_IMAGE_HEIGHT / currentImage.naturalHeight;
+
+            let ratio = Math.min(hRatio, vRatio);
+            if (ratio >= 1.0) {
+                // no need to scale down
+                currentScaledDownImageData = currentImage;
+                return;
+            }
+
+            let scaledDownWidth = currentImage.naturalWidth * ratio;
+            let scaledDownHeight = currentImage.naturalHeight * ratio;
+
+            let canvas = document.createElement('canvas');
+            canvas.width = scaledDownWidth;
+            canvas.height = scaledDownHeight;
+
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, scaledDownWidth, scaledDownHeight);
+
+            currentScaledDownImageData = canvas.toDataURL();
+        }
 
         function drawImage() {
             // clear canvas
@@ -83,13 +124,12 @@
 
         function callUpload() {
             // TODO show loading overlay
-            // TODO: scale down image before uploading it
             $.ajax({
                 url: "/upload",
                 type: "POST",
                 data: JSON.stringify({
                     // something like /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYG
-                    "image_b64": currentImage.src.split(",")[1],
+                    "image_b64": currentScaledDownImageData.split(",")[1],
                 }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -117,6 +157,8 @@
                     const img = new Image();
                     img.onload = function () {
                         currentImage = img;
+                        createScaledDownImage();
+                        debugImage(currentScaledDownImageData);
                         drawImage();
                         callUpload();
                     };
