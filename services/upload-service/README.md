@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 Run:
 ```shell
-flask --app main run
+flask --app main --debug run
 ```
 
 Test:
