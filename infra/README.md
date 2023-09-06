@@ -1,5 +1,8 @@
 ## Installing on KinD
 
+### Prerequisites
+- Helm version 3.8.0 or later 
+
 ```shell
 ./infra/kind-deploy.sh
 ```
