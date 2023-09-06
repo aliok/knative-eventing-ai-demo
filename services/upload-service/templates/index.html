@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Knative AI Demo</title>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 
     <style>
         html, body {
@@ -18,14 +23,12 @@
         #container {
             width: 100%;
             height: 100%;
-            #border: 1px solid red;
         }
 
         #image {
             height: 80%;
             width: calc(100% - 12px);
             margin: 5px 5px 0;
-            border: 1px solid #00b8d4;
         }
 
         #buttons {
@@ -38,6 +41,24 @@
             height: 100%;
             width: 100%;
         }
+
+        #imageSelectButton {
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
+            font-size: 3rem;
+        }
+
+        #imageSelectInput {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
     </style>
 </head>
 <body>
@@ -47,8 +68,25 @@
         <canvas id="canvas"></canvas>
     </div>
     <div id="buttons">
-        <input type="file" id="imageSelect" name="image" accept="image/*">
+        <div id="imageSelectButton" class="btn btn-outline-light btn-lg">
+            <span>📷</span>
+            <input type="file" id="imageSelectInput" name="image" accept="image/*">
+        </div>
     </div>
+
+    <div class="modal" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -107,7 +145,42 @@
             return canvas.toDataURL();
         }
 
+        class LoadingModal {
+            constructor() {
+                this.modal = new bootstrap.Modal('#loadingModal', {
+                    keyboard: false
+                });
+                this.hideRequested = false;
+
+                document.getElementById('loadingModal').addEventListener('shown.bs.modal', event => {
+                    // we need this as, it is possible that we want to hide the modal before it is shown
+                    if (this.hideRequested) {
+                        this.modal.hide();
+                        this.hideRequested = false;
+                    }
+                });
+
+                document.getElementById('loadingModal').addEventListener('hide.bs.modal', event => {
+                    this.hideRequested = true;
+                });
+
+                document.getElementById('loadingModal').addEventListener('hidden.bs.modal', event => {
+                    this.hideRequested = false;
+                });
+            }
+
+            show() {
+                this.modal.show();
+            }
+
+            hide() {
+                this.modal.hide();
+            }
+        }
+
         $(document).ready(() => {
+            const loadingModal = new LoadingModal();
+
             const canvas = document.getElementById('canvas');
             let $canvas = $("#canvas");
 
@@ -134,7 +207,6 @@
             }
 
             function callUpload() {
-                // TODO show loading overlay
                 $.ajax({
                     url: "/upload",
                     type: "POST",
@@ -147,10 +219,12 @@
                     success: function (data) {
                         // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
                         // TODO: hide loading overlay when we got the prediction result
+                        loadingModal.hide();
                         console.log("Success:", data);
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         // TODO hide loading overlay
+                        loadingModal.hide();
                         console.log("Error:", xhr.status, "-", xhr.responseText);
                         // TODO show error message
                     }
@@ -158,7 +232,9 @@
 
             }
 
-            $("#imageSelect").change(function () {
+            $("#imageSelectInput").change(function () {
+                loadingModal.show();
+
                 const file = this.files[0];
                 if (file) {
                     let reader = new FileReader();
