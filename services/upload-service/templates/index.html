@@ -52,6 +52,10 @@
 </div>
 
 <script>
+    // these are passed in from the server
+    const MAX_IMAGE_WIDTH =  {{ max_img_width }} ;
+    const MAX_IMAGE_HEIGHT = {{ max_img_height }} ;
+
     $(document).ready(() => {
         const canvas = document.getElementById('canvas');
         let $canvas = $("#canvas");

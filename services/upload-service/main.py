@@ -1,18 +1,19 @@
-from flask import Flask, send_from_directory, request
+from flask import Flask, render_template, request
 from PIL import Image
 import base64
 import io
+import os
 
 MAX_IMG_SIZE_IN_BYTES = 100 * 1024
-MAX_IMG_WIDTH = 640
-MAX_IMG_HEIGHT = 640
+MAX_IMG_WIDTH = os.environ.get("IMG_MAX_WIDTH", 640)
+MAX_IMG_HEIGHT = os.environ.get("IMG_MAX_HEIGHT", 640)
 
 app = Flask(__name__)
 
 
 @app.get('/')
 def send_report():
-    return send_from_directory('.', 'index.html')
+    return render_template('index.html', max_img_width=MAX_IMG_WIDTH, max_img_height=MAX_IMG_HEIGHT)
 
 
 @app.post("/upload")

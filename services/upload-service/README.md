@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 Run:
 ```shell
-flask --app main run
+IMG_MAX_WIDTH=640 IMG_MAX_HEIGHT=640 flask --app main run
 ```
 
 Test:
