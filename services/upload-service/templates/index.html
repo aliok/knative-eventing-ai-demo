@@ -52,122 +52,125 @@
 </div>
 
 <script>
-    function debugImage(imageData) {
-        try {
-            let img = new Image();
-            img.onload = function () {
-                console.log("Image dimensions:", img.width, "x", img.height, "ratio:", img.width / img.height, "size:", (imageData.length / 1024).toFixed(2), "Kb");
-                const style = `font-size: 300px; background-image: url("${imageData}"); background-size: contain; background-repeat: no-repeat;`;
-                console.log("%c     ", style);
-            };
-            img.src = imageData;
-        } catch (e) {
-            console.error(e);
+    // iife
+    (function () {
+        function debugImage(imageData) {
+            try {
+                let img = new Image();
+                img.onload = function () {
+                    console.log("Image dimensions:", img.width, "x", img.height, "ratio:", img.width / img.height, "size:", (imageData.length / 1024).toFixed(2), "Kb");
+                    const style = `font-size: 300px; background-image: url("${imageData}"); background-size: contain; background-repeat: no-repeat;`;
+                    console.log("%c     ", style);
+                };
+                img.src = imageData;
+            } catch (e) {
+                console.error(e);
+            }
         }
-    }
 
-    // these are passed in from the server
-    const MAX_IMAGE_WIDTH = parseInt("{{ max_img_width }}", 10);
-    const MAX_IMAGE_HEIGHT = parseInt("{{ max_img_height }}", 10);
+        // these are passed in from the server
+        const MAX_IMAGE_WIDTH = parseInt("{{ max_img_width }}", 10);
+        const MAX_IMAGE_HEIGHT = parseInt("{{ max_img_height }}", 10);
 
 
-    $(document).ready(() => {
-        const canvas = document.getElementById('canvas');
-        let $canvas = $("#canvas");
+        $(document).ready(() => {
+            const canvas = document.getElementById('canvas');
+            let $canvas = $("#canvas");
 
-        // Set canvas size to its visual size to avoid scaling
-        canvas.width = $canvas.width();
-        canvas.height = $canvas.height();
+            // Set canvas size to its visual size to avoid scaling
+            canvas.width = $canvas.width();
+            canvas.height = $canvas.height();
 
-        const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d');
 
-        let currentImage = null;
-        let currentScaledDownImageData = null;
-        let currentImageRatio = 1.0;
+            let currentImage = null;
+            let currentScaledDownImageData = null;
+            let currentImageRatio = 1.0;
 
-        function createScaledDownImage() {
-            // create a hidden canvas to scale down the image
-            let hRatio = MAX_IMAGE_WIDTH / currentImage.naturalWidth;
-            let vRatio = MAX_IMAGE_HEIGHT / currentImage.naturalHeight;
+            function createScaledDownImage() {
+                // create a hidden canvas to scale down the image
+                let hRatio = MAX_IMAGE_WIDTH / currentImage.naturalWidth;
+                let vRatio = MAX_IMAGE_HEIGHT / currentImage.naturalHeight;
 
-            let ratio = Math.min(hRatio, vRatio);
-            if (ratio >= 1.0) {
-                // no need to scale down
-                currentScaledDownImageData = currentImage;
-                return;
+                let ratio = Math.min(hRatio, vRatio);
+                if (ratio >= 1.0) {
+                    // no need to scale down
+                    currentScaledDownImageData = currentImage;
+                    return;
+                }
+
+                let scaledDownWidth = currentImage.naturalWidth * ratio;
+                let scaledDownHeight = currentImage.naturalHeight * ratio;
+
+                let canvas = document.createElement('canvas');
+                canvas.width = scaledDownWidth;
+                canvas.height = scaledDownHeight;
+
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, scaledDownWidth, scaledDownHeight);
+
+                currentScaledDownImageData = canvas.toDataURL();
             }
 
-            let scaledDownWidth = currentImage.naturalWidth * ratio;
-            let scaledDownHeight = currentImage.naturalHeight * ratio;
+            function drawImage() {
+                // clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            let canvas = document.createElement('canvas');
-            canvas.width = scaledDownWidth;
-            canvas.height = scaledDownHeight;
+                // TODO: need to do auto rotation based on image orientation
+                let hRatio = canvas.width / currentImage.naturalWidth;
+                let vRatio = canvas.height / currentImage.naturalHeight;
 
-            let ctx = canvas.getContext('2d');
-            ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, scaledDownWidth, scaledDownHeight);
+                currentImageRatio = Math.min(hRatio, vRatio);
+                ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, currentImage.width * currentImageRatio, currentImage.height * currentImageRatio);
+            }
 
-            currentScaledDownImageData = canvas.toDataURL();
-        }
+            function callUpload() {
+                // TODO show loading overlay
+                $.ajax({
+                    url: "/upload",
+                    type: "POST",
+                    data: JSON.stringify({
+                        // something like /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYG
+                        "image_b64": currentScaledDownImageData.split(",")[1],
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
+                        // TODO: hide loading overlay when we got the prediction result
+                        console.log("Success:", data);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        // TODO hide loading overlay
+                        console.log("Error:", xhr.status, "-", xhr.responseText);
+                        // TODO show error message
+                    }
+                });
 
-        function drawImage() {
-            // clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
 
-            // TODO: need to do auto rotation based on image orientation
-            let hRatio = canvas.width / currentImage.naturalWidth;
-            let vRatio = canvas.height / currentImage.naturalHeight;
+            $("#imageSelect").change(function () {
+                const file = this.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        const imageData = e.target.result;
 
-            currentImageRatio = Math.min(hRatio, vRatio);
-            ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, currentImage.width * currentImageRatio, currentImage.height * currentImageRatio);
-        }
-
-        function callUpload() {
-            // TODO show loading overlay
-            $.ajax({
-                url: "/upload",
-                type: "POST",
-                data: JSON.stringify({
-                    // something like /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYG
-                    "image_b64": currentScaledDownImageData.split(",")[1],
-                }),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (data) {
-                    // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
-                    // TODO: hide loading overlay when we got the prediction result
-                    console.log("Success:", data);
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    // TODO hide loading overlay
-                    console.log("Error:", xhr.status, "-", xhr.responseText);
-                    // TODO show error message
+                        const img = new Image();
+                        img.onload = function () {
+                            currentImage = img;
+                            createScaledDownImage();
+                            debugImage(currentScaledDownImageData);
+                            drawImage();
+                            callUpload();
+                        };
+                        img.src = imageData;
+                    }
+                    reader.readAsDataURL(file);
                 }
             });
-
-        }
-
-        $("#imageSelect").change(function () {
-            const file = this.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function (e) {
-                    const imageData = e.target.result;
-
-                    const img = new Image();
-                    img.onload = function () {
-                        currentImage = img;
-                        createScaledDownImage();
-                        debugImage(currentScaledDownImageData);
-                        drawImage();
-                        callUpload();
-                    };
-                    img.src = imageData;
-                }
-                reader.readAsDataURL(file);
-            }
         });
-    });
+    })();
 </script>
 </body>
 </html>
