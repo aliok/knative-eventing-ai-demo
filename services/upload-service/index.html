@@ -77,10 +77,11 @@
             ctx.drawImage(currentImage, 0, 0, currentImage.width, currentImage.height, 0, 0, currentImage.width * currentImageRatio, currentImage.height * currentImageRatio);
         }
 
-        function callPrediction() {
+        function callUpload() {
             // TODO show loading overlay
+            // TODO: scale down image before uploading it
             $.ajax({
-                url: "/predict",
+                url: "/upload",
                 type: "POST",
                 data: JSON.stringify({
                     // something like /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYG
@@ -89,31 +90,13 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    // TODO hide loading overlay
-                    if (!data || !data["score"] || data["score"] === 0) {
-                        // TODO show not found
-                        return;
-                    }
-                    const relativeSizeBox = data["box"];
-                    const absoluteSizeBox = {
-                        // weird that Ys come first
-                        "y1": relativeSizeBox[0] * currentImage.height * currentImageRatio,
-                        "x1": relativeSizeBox[1] * currentImage.width * currentImageRatio,
-                        "y2": relativeSizeBox[2] * currentImage.height * currentImageRatio,
-                        "x2": relativeSizeBox[3] * currentImage.width * currentImageRatio,
-                    };
-
-                    // draw bounding box on canvas
-                    ctx.beginPath();
-                    ctx.lineWidth = "2";
-                    ctx.strokeStyle = "red";
-                    ctx.rect(absoluteSizeBox["x1"], absoluteSizeBox["y1"], absoluteSizeBox["x2"] - absoluteSizeBox["x1"], absoluteSizeBox["y2"] - absoluteSizeBox["y1"]);
-                    ctx.stroke();
+                    // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
+                    // TODO: hide loading overlay when we got the prediction result
+                    console.log("Success:", data);
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     // TODO hide loading overlay
-                    console.log(xhr.status);
-                    console.log(thrownError);
+                    console.log("Error:", xhr.status, "-", xhr.responseText);
                     // TODO show error message
                 }
             });
@@ -131,7 +114,7 @@
                     img.onload = function () {
                         currentImage = img;
                         drawImage();
-                        callPrediction();
+                        callUpload();
                     };
                     img.src = imageData;
                 }

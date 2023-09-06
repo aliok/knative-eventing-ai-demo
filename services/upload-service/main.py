@@ -15,7 +15,7 @@ def send_report():
     return send_from_directory('.', 'index.html')
 
 
-@app.post("/predict")
+@app.post("/upload")
 def hello_world():
     # TODO: set req size limit in Flask
 
