@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 
 @app.get('/')
-def send_report():
+def send_client_html():
     return render_template('index.html', max_img_width=MAX_IMG_WIDTH, max_img_height=MAX_IMG_HEIGHT)
 
 
