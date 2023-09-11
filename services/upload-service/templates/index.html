@@ -118,13 +118,13 @@
         }
 
         #evaluatingView .spinner {
-            margin-left: 50%;
+            margin-left: calc(50% - 30px);
             margin-bottom: 20%;
 
-            --d:44px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            --d:150px;
+            width: 60px;
+            height: 60px;
+            border-radius: 100%;
             color: darkred;
             box-shadow:
                     calc(1*var(--d))      calc(0*var(--d))     0 0,
@@ -135,6 +135,7 @@
                     calc(-0.707*var(--d)) calc(-0.707*var(--d))0 10px,
                     calc(0*var(--d))      calc(-1*var(--d))    0 12px;
             animation: s7 1s infinite steps(8);
+            scale: 0.3;
         }
 
         @keyframes s7 {
@@ -146,7 +147,7 @@
             top: 0;
             text-align: center;
             width: 100%;
-            background: rgb(100, 225, 100);
+            background: rgb(0, 180, 0);
             font-size: 2rem;
             font-weight: bold;
             color: white;
@@ -160,7 +161,7 @@
             top: 1.8rem;
             padding-left: calc(50% - 2.5rem);
             padding-top: 0.7rem;
-            color: rgb(100, 225, 100);
+            color: rgb(0, 180, 0);
         }
 
         #success .checkmark svg {
@@ -172,7 +173,7 @@
             top: 0;
             text-align: center;
             width: 100%;
-            background: rgb(225, 100, 100);
+            background: darkred;
             font-size: 2rem;
             font-weight: bold;
             color: white;
@@ -186,7 +187,7 @@
             top: 1.8rem;
             padding-left: calc(50% - 2.5rem);
             padding-top: 0.7rem;
-            color: rgb(225, 100, 100);
+            color: darkred;
         }
 
         #failure .cross svg {
@@ -354,8 +355,9 @@
                     success: function (data) {
                         // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
                         // TODO: hide loading overlay when we got the prediction result
-                        $("#evaluatingView").hide();
-                        $("#success").show();
+                        // $("#evaluatingView").hide();
+                        // $("#success").show();
+                        // $("#failure").show();
                         console.log("Success:", data);
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
