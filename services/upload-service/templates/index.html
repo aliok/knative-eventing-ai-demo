@@ -12,7 +12,7 @@
           integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 
     <style>
-        html, body, #container, #homeView, #resultView {
+        html, body, #container, #homeView, #resultView, #evaluatingView {
             width: 100%;
             height: 100%;
             margin: 0;
@@ -99,6 +99,45 @@
             opacity: 0;
             filter: alpha(opacity=0);
         }
+
+        #evaluatingView{
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(255,255,255,0.8);
+            padding-top: 75%;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+
+        #evaluatingView .spinner {
+            margin-left: 50%;
+            margin-bottom: 20%;
+
+            --d:44px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            color: darkred;
+            box-shadow:
+                    calc(1*var(--d))      calc(0*var(--d))     0 0,
+                    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 2px,
+                    calc(0*var(--d))      calc(1*var(--d))     0 4px,
+                    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 6px,
+                    calc(-1*var(--d))     calc(0*var(--d))     0 8px,
+                    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 10px,
+                    calc(0*var(--d))      calc(-1*var(--d))    0 12px;
+            animation: s7 1s infinite steps(8);
+        }
+
+        @keyframes s7 {
+            100% {transform: rotate(1turn)}
+        }
     </style>
 </head>
 <body>
@@ -132,17 +171,10 @@
         </div>
     </div>
 
-
-    <div class="modal" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-body text-center">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
+    <div id="evaluatingView" style="display: none;">
+        <div class="spinner"></div>
+        <div>
+            Evaluating...
         </div>
     </div>
 
@@ -204,42 +236,7 @@
             return canvas.toDataURL();
         }
 
-        class LoadingModal {
-            constructor() {
-                this.modal = new bootstrap.Modal('#loadingModal', {
-                    keyboard: false
-                });
-                this.hideRequested = false;
-
-                document.getElementById('loadingModal').addEventListener('shown.bs.modal', event => {
-                    // we need this as, it is possible that we want to hide the modal before it is shown
-                    if (this.hideRequested) {
-                        this.modal.hide();
-                        this.hideRequested = false;
-                    }
-                });
-
-                document.getElementById('loadingModal').addEventListener('hide.bs.modal', event => {
-                    this.hideRequested = true;
-                });
-
-                document.getElementById('loadingModal').addEventListener('hidden.bs.modal', event => {
-                    this.hideRequested = false;
-                });
-            }
-
-            show() {
-                this.modal.show();
-            }
-
-            hide() {
-                this.modal.hide();
-            }
-        }
-
         $(document).ready(() => {
-            const loadingModal = new LoadingModal();
-
             let currentImage = null;
             let currentScaledDownImageData = null;
             let currentImageRatio = 1.0;
@@ -279,12 +276,12 @@
                     success: function (data) {
                         // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
                         // TODO: hide loading overlay when we got the prediction result
-                        loadingModal.hide();
+                        // $("#evaluatingView").hide();
                         console.log("Success:", data);
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         // TODO hide loading overlay
-                        loadingModal.hide();
+                        $("#evaluatingView").hide();
                         console.log("Error:", xhr.status, "-", xhr.responseText);
                         // TODO show error message
                     }
@@ -293,7 +290,7 @@
             }
 
             $("#imageSelectInput").change(function () {
-                loadingModal.show();
+                $("#evaluatingView").show();
 
                 const file = this.files[0];
                 if (file) {
