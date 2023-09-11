@@ -67,9 +67,11 @@
         }
 
         #image {
-            height: 100%;
+            /*4.4rem is the height of the success/failure indicator*/
+            height: calc(100% - 4.4rem);
             width: auto;
             margin: 0;
+            margin-top: 4.4rem;
         }
 
         .buttons {
@@ -138,6 +140,32 @@
         @keyframes s7 {
             100% {transform: rotate(1turn)}
         }
+
+        #success {
+            position: absolute;
+            top: 0;
+            text-align: center;
+            width: 100%;
+            background: rgb(100, 225, 100);
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            padding-top: 0.7rem;
+            padding-bottom: 0.7rem;
+        }
+
+        #success .checkmark {
+            position: absolute;
+            top: 1.8rem;
+            padding-left: calc(50% - 2.5rem);
+            padding-top: 0.7rem;
+            color: rgb(100, 225, 100);
+        }
+
+        #success .checkmark svg {
+            width: 5rem;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +204,21 @@
         <div>
             Evaluating...
         </div>
+    </div>
+
+    <div id="success" style="display: none;">
+        <div class="checkmark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor"
+                 class="bi bi-check-circle" viewBox="0 0 16 16">
+                <path
+                        d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8
+                        0zm3.354 5.646a.5.5 0 0 0-.708 0L7.5
+                        9.793 5.354 7.646a.5.5 0 1 0-.708.708l2.5
+                        2.5a.5.5 0 0 0 .708 0l4.5-4.5a.5.5
+                        0 0 0 0-.708z"/>
+            </svg>
+        </div>
+        Knative
     </div>
 
 </div>
@@ -276,7 +319,8 @@
                     success: function (data) {
                         // TODO: we're now done with uploading, we will wait for the WS to send us the prediction result
                         // TODO: hide loading overlay when we got the prediction result
-                        // $("#evaluatingView").hide();
+                        $("#evaluatingView").hide();
+                        $("#success").show();
                         console.log("Success:", data);
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
