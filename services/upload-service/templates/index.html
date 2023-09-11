@@ -166,6 +166,32 @@
         #success .checkmark svg {
             width: 5rem;
         }
+
+        #failure {
+            position: absolute;
+            top: 0;
+            text-align: center;
+            width: 100%;
+            background: rgb(225, 100, 100);
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            padding-top: 0.7rem;
+            padding-bottom: 0.7rem;
+        }
+
+        #failure .cross {
+            position: absolute;
+            top: 1.8rem;
+            padding-left: calc(50% - 2.5rem);
+            padding-top: 0.7rem;
+            color: rgb(225, 100, 100);
+        }
+
+        #failure .cross svg {
+            width: 5rem;
+        }
     </style>
 </head>
 <body>
@@ -210,15 +236,24 @@
         <div class="checkmark">
             <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor"
                  class="bi bi-check-circle" viewBox="0 0 16 16">
+                <!-- use https://yqnn.github.io/svg-path-editor/-->
                 <path
-                        d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8
-                        0zm3.354 5.646a.5.5 0 0 0-.708 0L7.5
-                        9.793 5.354 7.646a.5.5 0 1 0-.708.708l2.5
-                        2.5a.5.5 0 0 0 .708 0l4.5-4.5a.5.5
-                        0 0 0 0-.708z"/>
+                        d="M 8 0 a 8 8 0 1 1 0 16 A 8 8 0 0 1 8 0 z m 5 5 a 1 1 0 0 0 0 -1 L 13 4 L 7.5 9.793 L 5.354 7.646 a 0.5 0.5 0 1 0 -0.708 0.708 l 2.5 2.5 a 0.5 0.5 0 0 0 0.708 0 l 5.146 -5.854 z"/>
             </svg>
         </div>
         Knative
+    </div>
+
+    <div id="failure" style="display: none;">
+        <div class="cross">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor"
+                 class="bi bi-x-circle" viewBox="0 0 16 16">
+                <!-- use https://yqnn.github.io/svg-path-editor/-->
+                <path
+                        d="M 8 2 a 8 8 0 1 1 0 16 A 8 8 0 0 1 8 2 z L 5 6 L 4 7 l 3 3 l -3 3 L 5 14 L 8 11 L 11 14 L 12 13 L 9 10 L 12 7 L 11 6 L 8 9 L 5 6 z"/>
+            </svg>
+        </div>
+        Not Knative
     </div>
 
 </div>
