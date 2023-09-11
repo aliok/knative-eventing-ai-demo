@@ -18,7 +18,11 @@ def send_client_html():
 
 @app.post("/upload")
 def hello_world():
-    # TODO: set req size limit in Flask
+    # set req size limit in Flask
+    # https://stackoverflow.com/questions/25036498/is-it-possible-to-limit-flask-post-data-size-on-a-per-route-basis
+    content_length = request.content_length
+    if content_length is not None and content_length > MAX_IMG_SIZE_IN_BYTES:
+        return f"Request length too large {content_length / 1024:.2f} KB", 400
 
     if "image_b64" not in request.json:
         return "Missing image_b64", 400
