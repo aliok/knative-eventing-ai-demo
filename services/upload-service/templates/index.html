@@ -12,17 +12,12 @@
           integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 
     <style>
-        html, body {
+        html, body, #container, #homeView, #resultView {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
-        }
-
-        #container, #homeView {
-            width: 100%;
-            height: 100%;
         }
 
         #homeView .title {
@@ -72,9 +67,9 @@
         }
 
         #image {
-            height: 80%;
-            width: calc(100% - 12px);
-            margin: 5px 5px 0;
+            height: 100%;
+            width: auto;
+            margin: 0;
         }
 
         .buttons {
@@ -131,7 +126,7 @@
             </div>
         </div>
     </div>
-    <div id="resultView">
+    <div id="resultView" style="display: none;">
         <div id="image">
             <canvas id="canvas"></canvas>
         </div>
@@ -245,20 +240,21 @@
         $(document).ready(() => {
             const loadingModal = new LoadingModal();
 
-            const canvas = document.getElementById('canvas');
-            let $canvas = $("#canvas");
-
-            // Set canvas size to its visual size to avoid scaling
-            canvas.width = $canvas.width();
-            canvas.height = $canvas.height();
-
-            const ctx = canvas.getContext('2d');
-
             let currentImage = null;
             let currentScaledDownImageData = null;
             let currentImageRatio = 1.0;
 
             function drawImage() {
+                const canvas = document.getElementById('canvas');
+                let $canvas = $("#canvas");
+
+                // Set canvas size to its visual size to avoid scaling
+                canvas.width = $canvas.width();
+                canvas.height = $canvas.height();
+
+                const ctx = canvas.getContext('2d');
+
+
                 // clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -301,21 +297,17 @@
 
                 const file = this.files[0];
                 if (file) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        const imageData = e.target.result;
-
-                        const img = new Image();
-                        img.onload = function () {
-                            currentImage = img;
-                            currentScaledDownImageData = createScaledDownImage(currentImage);
-                            debugImage(currentScaledDownImageData);
-                            drawImage();
-                            callUpload();
-                        };
-                        img.src = imageData;
-                    }
-                    reader.readAsDataURL(file);
+                    const img = new Image();
+                    img.onload = function () {
+                        currentImage = img;
+                        $("#homeView").hide();
+                        $("#resultView").show();
+                        drawImage();
+                        currentScaledDownImageData = createScaledDownImage(currentImage);
+                        debugImage(currentScaledDownImageData);
+                        callUpload();
+                    };
+                    img.src = URL.createObjectURL(file);
                 }
             });
         });
