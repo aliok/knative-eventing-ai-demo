@@ -20,9 +20,55 @@
             overflow: hidden;
         }
 
-        #container {
+        #container, #homeView {
             width: 100%;
             height: 100%;
+        }
+
+        #homeView .title {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            background: darkred;
+            color: white;
+            text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000;
+            border: 2px solid black;
+        }
+
+        #homeView .subtitle {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            background: white;
+            color: darkred;
+            border: 2px solid black;
+        }
+
+        #homeView .background{
+            background: linear-gradient(0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("static/bg.png");
+            /*background: url("static/bg.png");*/
+            height: 100%;
+        }
+
+        #homeView .bottom{
+            position: absolute;
+            bottom:0;
+            width: 100%;
+            text-align: center;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+        }
+
+        #homeView .bottomTitle{
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+        }
+
+        .touchImg{
+            width: 4rem;
+            height: auto;
         }
 
         #image {
@@ -31,9 +77,8 @@
             margin: 5px 5px 0;
         }
 
-        #buttons {
+        .buttons {
             text-align: center;
-            padding-top: 20px;
             height: 20%;
         }
 
@@ -64,15 +109,34 @@
 <body>
 
 <div id="container">
-    <div id="image">
-        <canvas id="canvas"></canvas>
-    </div>
-    <div id="buttons">
-        <div id="imageSelectButton" class="btn btn-outline-light btn-lg">
-            <span>📷</span>
-            <input type="file" id="imageSelectInput" name="image" accept="image/*">
+    <div id="homeView">
+        <div></div>
+        <div class="title">
+            SEE KNATIVE
+        </div>
+        <div class="subtitle">
+            "The Shazam for Logos"
+        </div>
+        <div class="background">
+        </div>
+        <div class="bottom">
+            <div class="buttons">
+                <div class="imageSelectButton" class="btn btn-outline-light btn-lg">
+                    <img class="touchImg" src="static/touch_button.svg" />
+                    <input type="file" id="imageSelectInput" name="image" accept="image/*">
+                </div>
+            </div>
+            <div class="bottomTitle">
+                Touch to SEE KNATIVE
+            </div>
         </div>
     </div>
+    <div id="resultView">
+        <div id="image">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
 
     <div class="modal" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
          aria-hidden="true">
