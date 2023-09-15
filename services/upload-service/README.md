@@ -1,3 +1,47 @@
+# Pre-requisites
+This service uploads files to a storage over S3 protocol.
+
+Setup Minio:
+```shell
+# create namespace
+kubectl create namespace minio-dev
+
+# create instance
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: minio
+  name: minio
+  namespace: minio-dev
+spec:
+  containers:
+  - name: minio
+    image: quay.io/minio/minio:latest
+    command:
+    - /bin/bash
+    - -c
+    args: 
+    - minio server /data --console-address :9090
+    env:
+    - name: MINIO_ROOT_USER
+      value: minio
+    - name: MINIO_ROOT_PASSWORD
+      value: minio123
+EOF
+
+# allow network access
+kubectl port-forward pod/minio --address 0.0.0.0 9000 9090 -n minio-dev
+
+# Create a bucket named "knative-eventing-ai-demo-uploads"
+python - <<EOF
+import boto3
+s3 = boto3.resource('s3', endpoint_url='http://localhost:9000', aws_access_key_id='minio', aws_secret_access_key='minio123')
+s3.create_bucket(Bucket="knative-eventing-ai-demo-uploads")
+EOF
+```
+
 # Running locally
 
 Setup virtual environment:
@@ -13,6 +57,11 @@ pip install -r requirements.txt
 
 Run:
 ```shell
+S3_ENDPOINT_URL="http://localhost:9000" \
+S3_ACCESS_KEY_ID="minio" \
+S3_ACCESS_KEY_SECRET="minio123" \
+S3_ACCESS_SSL_VERIFY="false" \
+S3_BUCKET_NAME="knative-eventing-ai-demo-uploads" \
 flask --app main --debug run
 ```
 
@@ -37,7 +86,14 @@ docker build . -t ${DOCKER_REPO_OVERRIDE}/upload-service
 
 Run the image:
 ```shell
-docker run --rm -p 5000:5000 ${DOCKER_REPO_OVERRIDE}/upload-service
+docker run --rm \
+-p 5000:5000 \
+-e S3_ENDPOINT_URL="http://192.168.2.160:9000" \
+-e S3_ACCESS_KEY_ID="minio" \
+-e S3_ACCESS_KEY_SECRET="minio123" \
+-e S3_ACCESS_SSL_VERIFY="false" \
+-e S3_BUCKET_NAME="knative-eventing-ai-demo-uploads" \
+${DOCKER_REPO_OVERRIDE}/upload-service
 ```
 
 Test the image:
