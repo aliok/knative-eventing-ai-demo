@@ -13,10 +13,8 @@ spec:
           ports:
             - containerPort: 5000
           env:
-            - name: POD_NAME
+            - name: SOURCE_DECLARATION
               value: "minio-webhook-source"
-            - name: POD_NAMESPACE
-              value: "ai-demo"
 ---
 apiVersion: sources.knative.dev/v1
 kind: SinkBinding

@@ -6,18 +6,15 @@ from cloudevents.http import CloudEvent
 from flask import Flask, request
 
 K_SINK = os.environ.get("K_SINK")
-POD_NAME = os.environ.get("POD_NAME")
-POD_NAMESPACE = os.environ.get("POD_NAMESPACE")
+SOURCE_DECLARATION = os.environ.get("SOURCE_DECLARATION")
 
 if not K_SINK:
     raise Exception("Missing K_SINK")
-if not POD_NAME:
-    raise Exception("Missing POD_NAME")
-if not POD_NAMESPACE:
+if not SOURCE_DECLARATION:
     raise Exception("Missing POD_NAMESPACE")
 
 print(f"Going to send events to K_SINK: {K_SINK}")
-print(f"Going to use CloudEvent source value as 'pod.{POD_NAMESPACE}.{POD_NAME}'")
+print(f"Going to use CloudEvent source value as '{SOURCE_DECLARATION}'")
 
 application = Flask(__name__)
 
@@ -104,7 +101,7 @@ def receive_event():
 
     ce_attributes = {
         "type": "com.knative.dev.minio.event",
-        "source": f"pod.{POD_NAMESPACE}.{POD_NAME}",
+        "source": SOURCE_DECLARATION,
     }
     event = CloudEvent(ce_attributes, ce_data)
 
