@@ -48,6 +48,7 @@ except Exception as e:
     print(e)
     raise Exception(f"Bucket {S3_BUCKET_NAME} does not exist")
 
+
 @app.get('/')
 def send_client_html():
     return render_template('index.html', max_img_width=MAX_IMG_WIDTH, max_img_height=MAX_IMG_HEIGHT)
@@ -55,6 +56,8 @@ def send_client_html():
 
 @app.post("/upload")
 def hello_world():
+    print("Received request")
+
     # set req size limit in Flask
     # https://stackoverflow.com/questions/25036498/is-it-possible-to-limit-flask-post-data-size-on-a-per-route-basis
     content_length = request.content_length
