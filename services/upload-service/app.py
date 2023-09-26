@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request
-from PIL import Image
 import base64
 import io
 import os
+import signal
+import sys
+import uuid
+
 import boto3
 import botocore
-import uuid
+from PIL import Image
+from flask import Flask, render_template, request
 
 MAX_IMG_SIZE_IN_BYTES = int(os.environ.get("MAX_IMG_SIZE_IN_BYTES", 1000 * 1000))
 MAX_IMG_WIDTH = int(os.environ.get("MAX_IMG_WIDTH", 640))
@@ -14,7 +17,7 @@ MAX_IMG_HEIGHT = int(os.environ.get("MAX_IMG_HEIGHT", 640))
 S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL")
 S3_ACCESS_KEY_ID = os.environ.get("S3_ACCESS_KEY_ID")
 S3_ACCESS_KEY_SECRET = os.environ.get("S3_ACCESS_KEY_SECRET")
-S3_ACCESS_SSL_VERIFY = bool(os.environ.get("S3_ACCESS_SSL_VERIFY", "true"))
+S3_ACCESS_SSL_VERIFY = os.environ.get("S3_ACCESS_SSL_VERIFY", "true").lower() == "true"
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
 if not S3_ENDPOINT_URL:
@@ -48,6 +51,16 @@ except Exception as e:
     print(e)
     raise Exception(f"Bucket {S3_BUCKET_NAME} does not exist")
 
+
+def handler(signal, frame):
+    print('Gracefully shutting down')
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGTERM, handler)
+
+
 @app.get('/')
 def send_client_html():
     return render_template('index.html', max_img_width=MAX_IMG_WIDTH, max_img_height=MAX_IMG_HEIGHT)
@@ -55,6 +68,8 @@ def send_client_html():
 
 @app.post("/upload")
 def hello_world():
+    print("Received request")
+
     # set req size limit in Flask
     # https://stackoverflow.com/questions/25036498/is-it-possible-to-limit-flask-post-data-size-on-a-per-route-basis
     content_length = request.content_length
@@ -99,3 +114,7 @@ def hello_world():
     return {
         "uploadId": upload_id
     }, 200
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

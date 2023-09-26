@@ -16,4 +16,5 @@ resources:
   - minio-webhook-source/event-display-service.yaml
   - minio-webhook-source/ksvc.yaml
   - minio-webhook-source/broker.yaml
+  - upload-service/service.yaml
 
