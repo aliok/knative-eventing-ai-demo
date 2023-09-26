@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request
-from PIL import Image
 import base64
 import io
 import os
+import signal
+import sys
+import uuid
+
 import boto3
 import botocore
-import uuid
+from PIL import Image
+from flask import Flask, render_template, request
 
 MAX_IMG_SIZE_IN_BYTES = int(os.environ.get("MAX_IMG_SIZE_IN_BYTES", 1000 * 1000))
 MAX_IMG_WIDTH = int(os.environ.get("MAX_IMG_WIDTH", 640))
@@ -47,6 +50,15 @@ try:
 except Exception as e:
     print(e)
     raise Exception(f"Bucket {S3_BUCKET_NAME} does not exist")
+
+
+def handler(signal, frame):
+    print('Gracefully shutting down')
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGTERM, handler)
 
 
 @app.get('/')
