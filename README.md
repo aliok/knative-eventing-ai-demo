@@ -29,3 +29,4 @@ TODO:
   - Inference using a 6000x8000 image (image to be posted by a phone) takes ~100s with 5 CPU and 12Gi memory
   - When CPU is set to 1, durations are ~2.5x longer
   - When TensorFlow Serving is used in a Docker container, durations are much shorter (no memory/CPU limit)
+- Use secrets for credentials in general
