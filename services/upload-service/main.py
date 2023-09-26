@@ -14,7 +14,7 @@ MAX_IMG_HEIGHT = int(os.environ.get("MAX_IMG_HEIGHT", 640))
 S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL")
 S3_ACCESS_KEY_ID = os.environ.get("S3_ACCESS_KEY_ID")
 S3_ACCESS_KEY_SECRET = os.environ.get("S3_ACCESS_KEY_SECRET")
-S3_ACCESS_SSL_VERIFY = bool(os.environ.get("S3_ACCESS_SSL_VERIFY", "true"))
+S3_ACCESS_SSL_VERIFY = os.environ.get("S3_ACCESS_SSL_VERIFY", "true").lower() == "true"
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
 if not S3_ENDPOINT_URL:
