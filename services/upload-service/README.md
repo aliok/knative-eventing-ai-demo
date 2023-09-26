@@ -87,7 +87,7 @@ docker build . -t ${DOCKER_REPO_OVERRIDE}/upload-service
 Run the image:
 ```shell
 docker run --rm \
--p 5000:5000 \
+-p 8080:8080 \
 -e S3_ENDPOINT_URL="http://192.168.2.160:9000" \
 -e S3_ACCESS_KEY_ID="minio" \
 -e S3_ACCESS_KEY_SECRET="minio1234" \
@@ -98,5 +98,5 @@ ${DOCKER_REPO_OVERRIDE}/upload-service
 
 Test the image:
 ```shell
-curl localhost:5000
+curl localhost:8080
 ```
