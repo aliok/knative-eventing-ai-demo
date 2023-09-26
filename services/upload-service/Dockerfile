@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 COPY requirements.txt /opt/app/requirements.txt
 
@@ -18,5 +18,11 @@ ENV MAX_IMG_HEIGHT=640
 ENV S3_BUCKET_NAME='ai-demo'
 ENV S3_ACCESS_SSL_VERIFY='true'
 
-CMD ["flask", "--app", "main", "run", "--host", "0.0.0.0"]
+ENV PORT=8080
+ENV WORKERS=1
+ENV THREADS=8
+ENV TIMEOUT=0
+
+CMD exec gunicorn --bind :$PORT --workers $WORKERS --threads $THREADS --timeout $TIMEOUT app:app
+
 
