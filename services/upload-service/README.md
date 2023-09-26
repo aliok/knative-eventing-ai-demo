@@ -28,17 +28,17 @@ spec:
     - name: MINIO_ROOT_USER
       value: minio
     - name: MINIO_ROOT_PASSWORD
-      value: minio123
+      value: minio1234
 EOF
 
 # allow network access
 kubectl port-forward pod/minio --address 0.0.0.0 9000 9090 -n minio-dev
 
-# Create a bucket named "knative-eventing-ai-demo-uploads"
+# Create a bucket named "ai-demo"
 python - <<EOF
 import boto3
-s3 = boto3.resource('s3', endpoint_url='http://localhost:9000', aws_access_key_id='minio', aws_secret_access_key='minio123')
-s3.create_bucket(Bucket="knative-eventing-ai-demo-uploads")
+s3 = boto3.resource('s3', endpoint_url='http://localhost:9000', aws_access_key_id='minio', aws_secret_access_key='minio1234')
+s3.create_bucket(Bucket="ai-demo")
 EOF
 ```
 
@@ -59,9 +59,9 @@ Run:
 ```shell
 S3_ENDPOINT_URL="http://localhost:9000" \
 S3_ACCESS_KEY_ID="minio" \
-S3_ACCESS_KEY_SECRET="minio123" \
+S3_ACCESS_KEY_SECRET="minio1234" \
 S3_ACCESS_SSL_VERIFY="false" \
-S3_BUCKET_NAME="knative-eventing-ai-demo-uploads" \
+S3_BUCKET_NAME="ai-demo" \
 flask --app main --debug run
 ```
 
@@ -90,9 +90,9 @@ docker run --rm \
 -p 5000:5000 \
 -e S3_ENDPOINT_URL="http://192.168.2.160:9000" \
 -e S3_ACCESS_KEY_ID="minio" \
--e S3_ACCESS_KEY_SECRET="minio123" \
+-e S3_ACCESS_KEY_SECRET="minio1234" \
 -e S3_ACCESS_SSL_VERIFY="false" \
--e S3_BUCKET_NAME="knative-eventing-ai-demo-uploads" \
+-e S3_BUCKET_NAME="ai-demo" \
 ${DOCKER_REPO_OVERRIDE}/upload-service
 ```
 
